@@ -25,29 +25,10 @@ class PlayersList
     end
   end
 
-  # プレイヤーのリストをユーザに通知する
-  def notify_players_list(event:)
-    if @list.empty?
-      event.send_message(BotMessage.no_players)
-    else
-      event.send_message(BotMessage.players_list(@list))
-    end
-  end
-
   # ボイスチャットに参加しているプレイヤー一覧からチーム分けを作成する
   def make_two_teams_by_voice_chat_players(event:)
     # オリジナルの参加者リストを保持
     players_list_original = @list.dup
-
-    if event.user.voice_channel.nil?
-      event.send_message(BotMessage.no_voice_channel_members)
-      return
-    end
-
-    if no_players?
-      event.send_message(BotMessage.need_two_or_more_players)
-      return
-    end
 
     clear_list! # 一時的にリストを空にする
 
@@ -55,14 +36,12 @@ class PlayersList
       event.user.voice_channel.users.map(&:name)
     )
 
-    event.send_message(
-      BotMessage.tagged_team_list(
-        divide_to_two_teams
-      )
-    )
+    ret = divide_to_two_teams
 
     # 参加者リストをオリジナルのものに戻す
     @list = players_list_original
+
+    ret
   end
 
   # 差分をユーザに通知するため、すでにリストにある名前とそうでない名前を振り分ける
@@ -103,21 +82,7 @@ class PlayersList
          .sort_by { rand }
   end
 
-
   class << self
-    # リストの状態変化をユーザに通知する
-    def notify_players_name(event:, added_names: nil, removed_names: nil, already_added: nil)
-      messages =
-        [
-          BotMessage.added(added_names),
-          BotMessage.removed(removed_names),
-          BotMessage.already_added(already_added)
-        ].compact
-         .join("\n")
-
-      event.send_message(messages)
-    end
-
     # Discordrb の event を利用してボイスチャットに参加しているユーザ名一覧を取得する
     def voice_channel_player_names(event:)
       event.user
@@ -127,3 +92,4 @@ class PlayersList
     end
   end
 end
+

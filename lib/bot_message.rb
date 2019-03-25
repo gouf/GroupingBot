@@ -72,5 +72,15 @@ EOS
     def map_list(map)
       "```\n #{map}\n```"
     end
+
+    # リストの状態変化をユーザに通知するメッセージ文言を作成
+    def build_players_name_list(added_names: nil, removed_names: nil, already_added: nil)
+      [
+        BotMessage.added(added_names),
+        BotMessage.removed(removed_names),
+        BotMessage.already_added(already_added)
+      ].compact
+       .join("\n")
+    end
   end
 end

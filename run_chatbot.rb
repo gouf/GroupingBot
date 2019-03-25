@@ -62,11 +62,14 @@ discord_chatbot.command [:add, :addme] do |event, *code|
   matched, unmatched =
     $players.filter_matched_or_not(player_names)
 
-  $players.notify_players_name(
-    event: event,
-    added_names: matched,
-    already_added: unmatched
-  )
+  messages =
+    BotMessage.build_players_name_list(
+      event: event,
+      added_names: matched,
+      already_added: unmatched
+    )
+
+  event.send_message(messages)
 
 end
 
@@ -85,11 +88,13 @@ discord_chatbot.command :addall do |event|
 
   $players.insert_new_players(voice_channel_player_names)
 
-  $players.notify_players_name(
-    event: event,
-    added_names: matched,
-    already_added: unmatched
-  )
+  messages =
+    BotMessage.build_players_name_list(
+      added_names: matched,
+      already_added: unmatched
+    )
+
+  event.send_message(messages)
 
 end
 
@@ -103,16 +108,25 @@ discord_chatbot.command [:remove, :rm, :removeme, :rmme] do |event, *code|
 
   $players.remove_players_from_list(player_names)
 
-  PlayersList.notify_players_name(
-    event: event,
-    removed_names: matched,
-    already_added: unmatched
-  )
+  messages =
+    BotMessage.build_players_name_list(
+      removed_names: matched,
+      already_added: unmatched
+    )
+
+  event.send_message(messages)
 end
 
 # 参加者一覧をリストアップ
 discord_chatbot.command [:list, :ls] do |event, *code|
-  $players.notify_players_list(event: event)
+  messages =
+    if $players.list.empty?
+      BotMessage.no_players
+    else
+      BotMessage.players_list($players.list)
+    end
+
+  event.send_message(messages)
 end
 
 # 参加者リスト初期化
@@ -137,7 +151,23 @@ end
 
 # 一発で発言者の居るボイスチャンネルメンバー全員のチーム分け
 discord_chatbot.command [:r6s, :r6] do |event|
-  $players.make_two_teams_by_voice_chat_players(event: event)
+  if event.user.voice_channel.nil?
+    event.send_message(BotMessage.no_voice_channel_members)
+    return
+  end
+
+  if $players.no_players?
+    event.send_message(BotMessage.need_two_or_more_players)
+    return
+  end
+
+  messages = $players.make_two_teams_by_voice_chat_players
+
+  event.send_message(
+    BotMessage.tagged_team_list(
+      messages
+    )
+  )
 end
 
 # YAML ファイルに設定したステージ情報をもとにランダム指定
