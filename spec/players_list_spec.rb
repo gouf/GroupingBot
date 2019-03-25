@@ -1,6 +1,31 @@
+class EventMock
+  def send_message(message)
+    message
+  end
+end
+
 describe PlayersList do
+  subject { PlayersList.new }
+
+  describe 'プレイヤーのリストをユーザに通知' do
+    context '@list が空の場合' do
+      it '空である旨のメッセージが送信される' do
+        result = subject.notify_players_list(event: EventMock.new)
+        expect(result).to eq BotMessage.no_players
+      end
+    end
+
+    context '@list に値がある場合' do
+      before { subject.insert_new_players_to_list(%w[foo bar]) }
+
+      it 'プレイヤーのリストがメッセージとして送信される' do
+        result = subject.notify_players_list(event: EventMock.new)
+        expect(result).to eq BotMessage.players_list(%w[foo bar])
+      end
+    end
+  end
+
   describe 'プレイヤーの追加と削除' do
-    subject { PlayersList.new }
     let(:player_names) { %w[foo bar] }
 
     before { subject.insert_new_players_to_list(player_names) }

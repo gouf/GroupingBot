@@ -39,7 +39,7 @@ class BotMessage
       '初期化完了。'
     end
 
-    def player_list(player_list)
+    def players_list(player_list)
       "```\n#{player_list.join("\n")}\n```"
     end
 
