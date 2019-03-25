@@ -2,6 +2,8 @@
 # TODO: テストコードを追加する
 # FIXME: エラーがあれば修正する
 
+require 'active_support/core_ext/object/blank'
+
 # Discord bot に喋らせるセリフ集
 class BotMessage
   class << self
