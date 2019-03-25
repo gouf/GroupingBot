@@ -1,9 +1,12 @@
+require 'active_support/core_ext/enumerable'
 # TODO: 実際に動作するか検証する
 # TODO: テストコードを追加する
 # FIXME: エラーがあれば修正する
 
 # 各参加者のリストを管理・通知する
 class PlayersList
+  attr_reader :list
+
   def initialize
     @list = []
   end
@@ -47,7 +50,6 @@ class PlayersList
     end
 
     clear_list! # 一時的にリストを空にする
-
 
     insert_new_players(
       event.user.voice_channel.users.map(&:name)
@@ -97,7 +99,7 @@ class PlayersList
   # 与えられたプレイヤー名のリストから2つのチームを作成
   def divide_to_two_teams
     @list.sort_by { rand }
-         .each_slice((players_list.size.succ.div(2))
+         .each_slice(players_list.size.succ.div(2))
          .sort_by { rand }
   end
 
